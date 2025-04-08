@@ -18,11 +18,3 @@ services:
         generateValue: true
       - key: JWT_EXPIRES_IN
         value: 1h
-
-databases:
-  - name: task-management-db
-    databaseName: task_management
-    user: task_management_user
-    plan: free
-    region: singapore
-    ipAllowList: [] # optional (allows all)
