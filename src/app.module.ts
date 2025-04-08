@@ -23,14 +23,13 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
       useFactory: async (
         configService: ConfigService,
       ): Promise<TypeOrmModuleOptions> => {
-        const dbType = configService.get('DB_TYPE', 'mysql');
+        const dbType = configService.get('DB_TYPE', 'postgres');
 
         if (configService.get('DATABASE_URL')) {
           return {
             type: 'postgres',
             url: configService.get('DATABASE_URL'),
             entities: [User, Task, AccessToken],
-            synchronize: configService.get('NODE_ENV') !== 'production',
             ssl: {
               rejectUnauthorized: false,
             },
@@ -38,14 +37,13 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
         }
 
         return {
-          type: dbType === 'postgres' ? 'postgres' : 'mysql',
+          type: 'postgres',
           host: configService.get('DB_HOST'),
           port: parseInt(configService.get('DB_PORT', '5432')),
           username: configService.get('DB_USERNAME'),
           password: configService.get('DB_PASSWORD'),
           database: configService.get<string>('DB_DATABASE'),
           entities: [User, Task, AccessToken],
-          synchronize: configService.get('NODE_ENV') !== 'production',
         } as TypeOrmModuleOptions;
       },
       inject: [ConfigService],
