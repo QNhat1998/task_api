@@ -1,0 +1,45 @@
+services:
+  - type: web
+    name: task-management-api
+    env: node
+    region: singapore # or choose a region closer to your users
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8080
+      - key: DB_TYPE
+        value: postgres
+      - key: DB_HOST
+        fromDatabase:
+          name: task-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: task-db
+          property: port
+      - key: DB_USERNAME
+        fromDatabase:
+          name: task-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: task-db
+          property: password
+      - key: DB_DATABASE
+        fromDatabase:
+          name: task-db
+          property: database
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 1h
+
+databases:
+  - name: task-db
+    databaseName: task_db
+    user: task_user
+    plan: free
+    region: singapore # or choose a region closer to your users

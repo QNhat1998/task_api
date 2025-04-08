@@ -19,16 +19,19 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     AuthModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get('DB_HOST'),
-        port: configService.get('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_DATABASE'),
-        entities: [User, Task, AccessToken],
-        synchronize: configService.get('NODE_ENV') !== 'production',
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const dbType = configService.get('DB_TYPE', 'mysql');
+        return {
+          type: dbType === 'postgres' ? 'postgres' : 'mysql',
+          host: configService.get('DB_HOST'),
+          port: configService.get('DB_PORT'),
+          username: configService.get('DB_USERNAME'),
+          password: configService.get('DB_PASSWORD'),
+          database: configService.get('DB_DATABASE'),
+          entities: [User, Task, AccessToken],
+          synchronize: configService.get('NODE_ENV') !== 'production',
+        };
+      },
       inject: [ConfigService],
     }),
   ],
