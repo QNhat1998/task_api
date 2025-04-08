@@ -8,8 +8,6 @@ import { Task } from './task/entities/task.entity';
 import { AccessToken } from './auth/entities/access-token.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
-import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
 
 @Module({
   imports: [
@@ -26,7 +24,20 @@ import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOpti
         configService: ConfigService,
       ): Promise<TypeOrmModuleOptions> => {
         const dbType = configService.get('DB_TYPE', 'mysql');
-        const config = {
+
+        if (configService.get('DATABASE_URL')) {
+          return {
+            type: 'postgres',
+            url: configService.get('DATABASE_URL'),
+            entities: [User, Task, AccessToken],
+            synchronize: configService.get('NODE_ENV') !== 'production',
+            ssl: {
+              rejectUnauthorized: false,
+            },
+          } as TypeOrmModuleOptions;
+        }
+
+        return {
           type: dbType === 'postgres' ? 'postgres' : 'mysql',
           host: configService.get('DB_HOST'),
           port: parseInt(configService.get('DB_PORT', '5432')),
@@ -35,11 +46,7 @@ import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOpti
           database: configService.get<string>('DB_DATABASE'),
           entities: [User, Task, AccessToken],
           synchronize: configService.get('NODE_ENV') !== 'production',
-        };
-
-        return dbType === 'postgres'
-          ? (config as PostgresConnectionOptions)
-          : (config as MysqlConnectionOptions);
+        } as TypeOrmModuleOptions;
       },
       inject: [ConfigService],
     }),
